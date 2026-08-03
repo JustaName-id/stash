@@ -35,12 +35,30 @@ fn capture_frontmost_selection(app: &AppHandle) -> Option<String> {
     #[cfg(target_os = "macos")]
     {
         let clipboard = app.clipboard();
-        let before = clipboard.read_text().unwrap_or_default();
+        // Ok(text) — restorable. Err — non-text content (image, files):
+        // never overwrite it with a text write.
+        let before = clipboard.read_text().ok();
         synthesize_cmd_c();
-        std::thread::sleep(std::time::Duration::from_millis(150));
-        let after = clipboard.read_text().unwrap_or_default();
-        let _ = clipboard.write_text(before.clone());
-        (!after.is_empty() && after != before).then_some(after)
+        // Poll with early exit instead of one long sleep: typical captures
+        // land in 30-60 ms, keeping the panel snappy.
+        let mut after = String::new();
+        for _ in 0..8 {
+            std::thread::sleep(std::time::Duration::from_millis(30));
+            after = clipboard.read_text().unwrap_or_default();
+            match &before {
+                Some(b) if after != *b => break,
+                None if !after.is_empty() => break,
+                _ => {}
+            }
+        }
+        if let Some(b) = &before {
+            let _ = clipboard.write_text(b.clone());
+        }
+        let changed = match &before {
+            Some(b) => after != *b,
+            None => !after.is_empty(),
+        };
+        (changed && !after.is_empty()).then_some(after)
     }
 }
 
