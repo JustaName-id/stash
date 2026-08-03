@@ -68,12 +68,18 @@ fn drain_mcp_inbox(app: AppHandle) -> Result<Vec<InboxEntry>, String> {
             .and_then(|raw| serde_json::from_str::<serde_json::Value>(&raw).ok())
             .and_then(|v| {
                 let text = v.get("text")?.as_str()?.trim().to_string();
-                (!text.is_empty()).then(|| InboxEntry {
-                    text,
-                    section: v
-                        .get("section")
-                        .and_then(|s| s.as_str())
-                        .map(str::to_string),
+                let created = v.get("createdAt").and_then(|c| c.as_f64()).unwrap_or(0.0);
+                (!text.is_empty()).then(|| {
+                    (
+                        created,
+                        InboxEntry {
+                            text,
+                            section: v
+                                .get("section")
+                                .and_then(|s| s.as_str())
+                                .map(str::to_string),
+                        },
+                    )
                 })
             });
         match parsed {
@@ -87,7 +93,9 @@ fn drain_mcp_inbox(app: AppHandle) -> Result<Vec<InboxEntry>, String> {
             }
         }
     }
-    Ok(entries)
+    // Oldest first, so merged captures keep chronological order.
+    entries.sort_by(|a, b| a.0.total_cmp(&b.0));
+    Ok(entries.into_iter().map(|(_, e)| e).collect())
 }
 
 fn show_panel(app: &AppHandle) {

@@ -9,7 +9,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, writeFile, mkdir, rename } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
@@ -131,14 +131,19 @@ server.registerTool(
     // One file per entry: no read-modify-write, so concurrent MCP sessions
     // and the app's drain can never race each other.
     await mkdir(INBOX_DIR, { recursive: true });
+    // tmp + rename: the drain only reads .json files, and rename is atomic,
+    // so it can never observe a half-written entry.
+    const id = randomUUID();
+    const tmp = join(INBOX_DIR, `${id}.tmp`);
     await writeFile(
-      join(INBOX_DIR, `${randomUUID()}.json`),
+      tmp,
       JSON.stringify({
         text: text.trim(),
         section: section?.trim() || null,
         createdAt: Date.now(),
       }),
     );
+    await rename(tmp, join(INBOX_DIR, `${id}.json`));
     return {
       content: [
         {
