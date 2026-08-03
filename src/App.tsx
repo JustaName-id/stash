@@ -181,7 +181,14 @@ export default function App() {
     }
   };
 
-  const visible = visibleItems(items, activeSection, showDone, searchQuery);
+  const collapsed = useStashStore((s) => s.collapsed);
+  const visible = visibleItems(
+    items,
+    activeSection,
+    showDone,
+    searchQuery,
+    collapsed,
+  );
   const doneCount = items.filter((i) => i.done).length;
   const activeName = items.find((i) => i.id === activeSection)?.text ?? null;
 
@@ -369,7 +376,11 @@ export default function App() {
           ];
           const nextIsSection =
             idx === visible.length - 1 || visible[idx + 1].kind === "section";
-          if (item.kind === "section" && nextIsSection) {
+          if (
+            item.kind === "section" &&
+            nextIsSection &&
+            !collapsed.includes(item.id)
+          ) {
             rows.push(
               <li
                 key={`${item.id}-empty`}

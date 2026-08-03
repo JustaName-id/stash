@@ -7,22 +7,34 @@ export function visibleItems(
   activeSection: string | null,
   showDone: boolean,
   query = "",
+  collapsed: string[] = [],
 ): Item[] {
   const q = query.trim().toLowerCase();
   if (q) {
-    // Search is global: flat, case-insensitive match across all sections.
+    // Search is global: flat, case-insensitive match across all sections,
+    // ignoring collapse so matches are always findable.
     return items.filter(
       (i) =>
         i.text.toLowerCase().includes(q) &&
         (i.kind === "section" || showDone || !i.done),
     );
   }
-  // The active section only routes captures — it never filters the view
-  // (all sections and loose items stay visible, like the reference app).
+  // The active section only routes captures — it never filters the view.
   void activeSection;
-  return showDone
-    ? items
-    : items.filter((i) => i.kind === "section" || !i.done);
+  const hiddenSections = new Set(collapsed);
+  const out: Item[] = [];
+  let hiding = false;
+  for (const i of items) {
+    if (i.kind === "section") {
+      hiding = hiddenSections.has(i.id);
+      out.push(i);
+      continue;
+    }
+    if (hiding) continue;
+    if (!showDone && i.done) continue;
+    out.push(i);
+  }
+  return out;
 }
 
 /** Bulk-copy text: selected items joined by newlines in list order (AC-13). */

@@ -292,6 +292,29 @@ describe("stash store", () => {
     expect(fresh.getState().selected).toHaveLength(1);
   });
 
+  it("collapsed sections hide their items; capture auto-expands", () => {
+    const store = createStashStore();
+    store.getState().add("# S");
+    store.getState().add("inside");
+    const section = store.getState().items[0];
+    store.getState().toggleCollapsed(section.id);
+    const vis = visibleItems(
+      store.getState().items,
+      null,
+      true,
+      "",
+      store.getState().collapsed,
+    );
+    expect(vis.map((i) => i.text)).toEqual(["S"]);
+    // Search ignores collapse.
+    expect(
+      visibleItems(store.getState().items, null, true, "inside", store.getState().collapsed),
+    ).toHaveLength(1);
+    // Capturing into the active (collapsed) section expands it.
+    store.getState().add("new capture");
+    expect(store.getState().collapsed).toEqual([]);
+  });
+
   it("survives a JSON round-trip", () => {
     const store = createStashStore();
     store.getState().add("https://tanstack.com/query");

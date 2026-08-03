@@ -34,6 +34,7 @@ export function ItemRow({
 }: ItemRowProps) {
   const toggle = useStashStore((s) => s.toggle);
   const remove = useStashStore((s) => s.remove);
+  const isCollapsed = useStashStore((s) => s.collapsed.includes(item.id));
   const editRef = useRef<HTMLTextAreaElement>(null);
   const settledRef = useRef(false);
 
@@ -81,6 +82,14 @@ export function ItemRow({
         {...dragProps}
         className="group flex cursor-grab items-center gap-2 px-1 pt-3 pb-0.5"
       >
+        <button
+          onClick={() => useStashStore.getState().toggleCollapsed(item.id)}
+          title={isCollapsed ? "Expand section" : "Collapse section"}
+          aria-expanded={!isCollapsed}
+          className="cursor-pointer text-[10px] text-neutral-500 hover:text-amber-400"
+        >
+          {isCollapsed ? "▸" : "▾"}
+        </button>
         <button
           role="heading"
           aria-level={2}

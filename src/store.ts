@@ -21,6 +21,8 @@ export interface StashState {
   hydrate: (items: Item[]) => void;
   searchQuery: string;
   anchorId: string | null;
+  collapsed: string[];
+  toggleCollapsed: (id: string) => void;
   toggleSelected: (id: string) => void;
   selectOnly: (id: string) => void;
   selectRange: (toId: string) => void;
@@ -51,6 +53,16 @@ export function createStashStore() {
     persistFailed: false,
     searchQuery: "",
     anchorId: null,
+    collapsed: [],
+    // Collapsing changes the view, so the selection clears (AC-13 rule).
+    toggleCollapsed: (id) =>
+      set((s) => ({
+        collapsed: s.collapsed.includes(id)
+          ? s.collapsed.filter((x) => x !== id)
+          : [...s.collapsed, id],
+        selected: [],
+        anchorId: null,
+      })),
     add: (text) => {
       const trimmed = text.trim();
       if (!trimmed) return;
@@ -83,7 +95,11 @@ export function createStashStore() {
           if (at !== -1) {
             const items = [...s.items];
             items.splice(at + 1, 0, item);
-            return { items };
+            // Never capture into a collapsed (invisible) section.
+            return {
+              items,
+              collapsed: s.collapsed.filter((c) => c !== s.activeSection),
+            };
           }
         }
         return { items: [item, ...s.items] };
@@ -112,7 +128,10 @@ export function createStashStore() {
             const at = s.items.findIndex((i) => i.id === sec.id);
             const items = [...s.items];
             items.splice(at + 1, 0, item);
-            return { items };
+            return {
+              items,
+              collapsed: s.collapsed.filter((c) => c !== sec.id),
+            };
           }
         }
         return { items: [item, ...s.items] };
@@ -128,6 +147,7 @@ export function createStashStore() {
         items: s.items.filter((i) => i.id !== id),
         selected: s.selected.filter((x) => x !== id),
         activeSection: s.activeSection === id ? null : s.activeSection,
+        collapsed: s.collapsed.filter((c) => c !== id),
       })),
     // View changes clear the selection so hidden items are never silently
     // copied by ⌘C (AC-13).
@@ -272,12 +292,25 @@ export function createStashStore() {
             : at + 1 < sections.length
               ? sections[at + 1].id
               : null;
-        // Switching views clears the selection (AC-13).
-        return { activeSection: next, selected: [], anchorId: null };
+        // Switching views clears the selection (AC-13); the newly active
+        // section expands.
+        return {
+          activeSection: next,
+          selected: [],
+          anchorId: null,
+          collapsed: next ? s.collapsed.filter((c) => c !== next) : s.collapsed,
+        };
       }),
     // Clicking a section header activates it; clicking the active one
     // returns to All (AC-16). View change clears the selection.
-    setActiveSection: (id) => set({ activeSection: id, selected: [], anchorId: null }),
+    // Activating a section also expands it.
+    setActiveSection: (id) =>
+      set((s) => ({
+        activeSection: id,
+        selected: [],
+        anchorId: null,
+        collapsed: id ? s.collapsed.filter((c) => c !== id) : s.collapsed,
+      })),
     // Delete/Backspace with a selection active (AC-13).
     removeSelected: () =>
       set((s) => {
