@@ -43,7 +43,10 @@ export async function initPersistence(): Promise<void> {
   useStashStore.getState().hydrate(items);
 
   // Merge captures dropped by the MCP server into its sidecar inbox.
+  let draining = false;
   const drainMcpInbox = async () => {
+    if (draining) return;
+    draining = true;
     try {
       const entries = await invoke<{ text: string; section: string | null }[]>(
         "drain_mcp_inbox",
@@ -53,6 +56,8 @@ export async function initPersistence(): Promise<void> {
       }
     } catch (err) {
       console.error("mcp inbox drain failed", err);
+    } finally {
+      draining = false;
     }
   };
   drainMcpInbox();

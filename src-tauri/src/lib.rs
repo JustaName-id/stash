@@ -50,26 +50,43 @@ struct InboxEntry {
 #[tauri::command]
 fn drain_mcp_inbox(app: AppHandle) -> Result<Vec<InboxEntry>, String> {
     let dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
-    let file = dir.join("mcp-inbox.json");
-    if !file.exists() {
+    let inbox = dir.join("mcp-inbox");
+    if !inbox.is_dir() {
         return Ok(vec![]);
     }
-    let raw = std::fs::read_to_string(&file).map_err(|e| e.to_string())?;
-    let parsed: Vec<serde_json::Value> = serde_json::from_str(&raw).unwrap_or_default();
-    let entries = parsed
-        .iter()
-        .filter_map(|v| {
-            Some(InboxEntry {
-                text: v.get("text")?.as_str()?.trim().to_string(),
-                section: v
-                    .get("section")
-                    .and_then(|s| s.as_str())
-                    .map(str::to_string),
-            })
-        })
-        .filter(|e| !e.text.is_empty())
-        .collect();
-    std::fs::remove_file(&file).map_err(|e| e.to_string())?;
+    // One file per entry: each is deleted only after a successful parse, so
+    // a write landing mid-drain is simply picked up next tick. Malformed
+    // files are renamed aside (never silently deleted).
+    let mut entries = Vec::new();
+    for e in std::fs::read_dir(&inbox).map_err(|e| e.to_string())? {
+        let path = e.map_err(|e| e.to_string())?.path();
+        if path.extension().and_then(|x| x.to_str()) != Some("json") {
+            continue;
+        }
+        let parsed = std::fs::read_to_string(&path)
+            .ok()
+            .and_then(|raw| serde_json::from_str::<serde_json::Value>(&raw).ok())
+            .and_then(|v| {
+                let text = v.get("text")?.as_str()?.trim().to_string();
+                (!text.is_empty()).then(|| InboxEntry {
+                    text,
+                    section: v
+                        .get("section")
+                        .and_then(|s| s.as_str())
+                        .map(str::to_string),
+                })
+            });
+        match parsed {
+            Some(entry) => {
+                if std::fs::remove_file(&path).is_ok() {
+                    entries.push(entry);
+                }
+            }
+            None => {
+                let _ = std::fs::rename(&path, path.with_extension("bad"));
+            }
+        }
+    }
     Ok(entries)
 }
 

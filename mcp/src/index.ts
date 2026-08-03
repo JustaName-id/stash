@@ -19,7 +19,7 @@ const DATA_DIR = join(
   "Library/Application Support/com.mariano.stash",
 );
 const STASH_FILE = join(DATA_DIR, "stash.json");
-const INBOX_FILE = join(DATA_DIR, "mcp-inbox.json");
+const INBOX_DIR = join(DATA_DIR, "mcp-inbox");
 
 interface Item {
   id: string;
@@ -128,21 +128,17 @@ server.registerTool(
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
   },
   async ({ text, section }) => {
-    await mkdir(DATA_DIR, { recursive: true });
-    let entries: unknown[] = [];
-    try {
-      entries = JSON.parse(await readFile(INBOX_FILE, "utf8"));
-      if (!Array.isArray(entries)) entries = [];
-    } catch {
-      entries = [];
-    }
-    entries.push({
-      id: randomUUID(),
-      text: text.trim(),
-      section: section?.trim() || null,
-      createdAt: Date.now(),
-    });
-    await writeFile(INBOX_FILE, JSON.stringify(entries, null, 2));
+    // One file per entry: no read-modify-write, so concurrent MCP sessions
+    // and the app's drain can never race each other.
+    await mkdir(INBOX_DIR, { recursive: true });
+    await writeFile(
+      join(INBOX_DIR, `${randomUUID()}.json`),
+      JSON.stringify({
+        text: text.trim(),
+        section: section?.trim() || null,
+        createdAt: Date.now(),
+      }),
+    );
     return {
       content: [
         {
