@@ -110,6 +110,23 @@ ever corrupt it's renamed to a timestamped `.bak`, never overwritten.
 > paste secrets, anything that can read your user files can read them — keep
 > FileVault enabled.
 
+## AI access (MCP)
+
+Stash ships a local [MCP](https://modelcontextprotocol.io) server so your AI
+tools can read your stash and capture into it — still 100% local (stdio, no
+ports, no network). Tools: `list_items`, `search_items`, `add_item`. Writes
+land in a sidecar inbox that the running app merges within seconds; the
+server never touches `stash.json` directly.
+
+```sh
+cd mcp && pnpm install && pnpm build
+# Claude Code:
+claude mcp add stash -- node "$(pwd)/dist/index.js"
+```
+
+Then ask Claude things like *"what's pending in my Stash?"* or *"save this
+prompt to my Prompts section"*.
+
 ## Development
 
 ```sh

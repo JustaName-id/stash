@@ -3032,6 +3032,8 @@ version = "0.1.0"
 dependencies = [
  "device_query",
  "macos-accessibility-client",
+ "serde",
+ "serde_json",
  "tauri",
  "tauri-build",
  "tauri-plugin-clipboard-manager",

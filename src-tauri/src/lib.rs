@@ -39,6 +39,40 @@ fn backup_corrupt_store(app: AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+#[derive(serde::Serialize)]
+struct InboxEntry {
+    text: String,
+    section: Option<String>,
+}
+
+/// Reads and deletes the MCP sidecar inbox. The MCP server never writes to
+/// stash.json (the running app owns it); it drops captures here instead.
+#[tauri::command]
+fn drain_mcp_inbox(app: AppHandle) -> Result<Vec<InboxEntry>, String> {
+    let dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
+    let file = dir.join("mcp-inbox.json");
+    if !file.exists() {
+        return Ok(vec![]);
+    }
+    let raw = std::fs::read_to_string(&file).map_err(|e| e.to_string())?;
+    let parsed: Vec<serde_json::Value> = serde_json::from_str(&raw).unwrap_or_default();
+    let entries = parsed
+        .iter()
+        .filter_map(|v| {
+            Some(InboxEntry {
+                text: v.get("text")?.as_str()?.trim().to_string(),
+                section: v
+                    .get("section")
+                    .and_then(|s| s.as_str())
+                    .map(str::to_string),
+            })
+        })
+        .filter(|e| !e.text.is_empty())
+        .collect();
+    std::fs::remove_file(&file).map_err(|e| e.to_string())?;
+    Ok(entries)
+}
+
 fn show_panel(app: &AppHandle) {
     let Some(window) = app.get_webview_window("main") else {
         return;
@@ -110,7 +144,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             is_accessibility_trusted,
             prompt_accessibility,
-            backup_corrupt_store
+            backup_corrupt_store,
+            drain_mcp_inbox
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

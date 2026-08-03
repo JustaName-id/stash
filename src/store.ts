@@ -14,6 +14,7 @@ export interface StashState {
   pinned: boolean;
   persistFailed: boolean;
   add: (text: string) => void;
+  addFromInbox: (text: string, sectionName: string | null) => void;
   toggle: (id: string) => void;
   remove: (id: string) => void;
   setShowDone: (show: boolean) => void;
@@ -88,6 +89,34 @@ export function createStashStore() {
         return { items: [item, ...s.items] };
       });
     },
+    // MCP captures: file under the named section if one matches
+    // (case-insensitive), else top of the Inbox.
+    addFromInbox: (text, sectionName) =>
+      set((s) => {
+        const trimmed = text.trim();
+        if (!trimmed) return s;
+        const item: Item = {
+          id: crypto.randomUUID(),
+          text: trimmed,
+          kind: detectKind(trimmed),
+          done: false,
+          createdAt: Date.now(),
+        };
+        if (sectionName) {
+          const sec = s.items.find(
+            (i) =>
+              i.kind === "section" &&
+              i.text.toLowerCase() === sectionName.toLowerCase(),
+          );
+          if (sec) {
+            const at = s.items.findIndex((i) => i.id === sec.id);
+            const items = [...s.items];
+            items.splice(at + 1, 0, item);
+            return { items };
+          }
+        }
+        return { items: [item, ...s.items] };
+      }),
     toggle: (id) =>
       set((s) => ({
         items: s.items.map((i) =>
