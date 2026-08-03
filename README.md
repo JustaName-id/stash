@@ -30,7 +30,9 @@ off as you go.
 ## Features
 
 - **⇧⇧ global capture** — double-tap Shift from any app to toggle the panel.
-  The capture input is focused and ready to type.
+  The capture input is focused and ready to type. If you had text selected
+  in the app you came from, it's captured automatically (your clipboard is
+  left untouched).
 - **Checklist workflow** — check items off as you use them; hide the done
   ones when you're finished.
 - **One-click copy** — click any item to copy it to the clipboard.

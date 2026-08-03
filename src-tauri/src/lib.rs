@@ -2,6 +2,47 @@ mod double_shift;
 
 use double_shift::DoubleTapDetector;
 use tauri::{AppHandle, Emitter, Manager};
+use tauri_plugin_clipboard_manager::ClipboardExt;
+
+/// Synthesize ⌘C into the frontmost app (macOS only).
+#[cfg(target_os = "macos")]
+fn synthesize_cmd_c() {
+    use core_graphics::event::{CGEvent, CGEventFlags, CGEventTapLocation};
+    use core_graphics::event_source::{CGEventSource, CGEventSourceStateID};
+    let Ok(src) = CGEventSource::new(CGEventSourceStateID::HIDSystemState) else {
+        return;
+    };
+    const KEY_C: u16 = 8;
+    if let Ok(down) = CGEvent::new_keyboard_event(src.clone(), KEY_C, true) {
+        down.set_flags(CGEventFlags::CGEventFlagCommand);
+        down.post(CGEventTapLocation::HID);
+    }
+    if let Ok(up) = CGEvent::new_keyboard_event(src, KEY_C, false) {
+        up.set_flags(CGEventFlags::CGEventFlagCommand);
+        up.post(CGEventTapLocation::HID);
+    }
+}
+
+/// Capture the frontmost app's current text selection via a synthetic ⌘C,
+/// restoring the user's clipboard afterwards. Runs only at the moment the
+/// double-Shift shortcut shows the panel; contents are never logged.
+fn capture_frontmost_selection(app: &AppHandle) -> Option<String> {
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = app;
+        None
+    }
+    #[cfg(target_os = "macos")]
+    {
+        let clipboard = app.clipboard();
+        let before = clipboard.read_text().unwrap_or_default();
+        synthesize_cmd_c();
+        std::thread::sleep(std::time::Duration::from_millis(150));
+        let after = clipboard.read_text().unwrap_or_default();
+        let _ = clipboard.write_text(before.clone());
+        (!after.is_empty() && after != before).then_some(after)
+    }
+}
 
 #[tauri::command]
 fn is_accessibility_trusted() -> bool {
@@ -118,7 +159,12 @@ fn toggle_panel(app: &AppHandle) {
     if visible && focused {
         let _ = window.hide();
     } else {
+        // Grab the frontmost app's selection before we steal focus.
+        let selection = if visible { None } else { capture_frontmost_selection(app) };
         show_panel(app);
+        if let Some(text) = selection {
+            let _ = app.emit("selection-captured", text);
+        }
     }
 }
 

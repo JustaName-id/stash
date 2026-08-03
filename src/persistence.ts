@@ -1,5 +1,6 @@
 import { load, type Store } from "@tauri-apps/plugin-store";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import type { Item } from "./types";
 import { useStashStore } from "./store";
 
@@ -41,6 +42,13 @@ export async function initPersistence(): Promise<void> {
     (i) => typeof i?.id === "string" && typeof i?.text === "string",
   );
   useStashStore.getState().hydrate(items);
+
+  // Text selected in another app when ⇧⇧ opened the panel (AC via
+  // selection capture). Registered here so the initialized-guard prevents
+  // StrictMode double-listeners.
+  listen<string>("selection-captured", (e) => {
+    useStashStore.getState().add(e.payload);
+  });
 
   // Merge captures dropped by the MCP server into its sidecar inbox.
   let draining = false;
