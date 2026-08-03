@@ -206,8 +206,10 @@ fn toggle_panel(app: &AppHandle) {
     if visible && focused {
         let _ = window.hide();
     } else {
-        // Grab the frontmost app's selection before we steal focus.
-        let selection = if visible { None } else { capture_frontmost_selection(app) };
+        // Grab the frontmost app's selection before we steal focus — the
+        // panel isn't focused here, so ⌘C lands in the app the user is in,
+        // whether the panel was hidden or visible-on-top.
+        let selection = capture_frontmost_selection(app);
         show_panel(app);
         if let Some(text) = selection {
             let _ = app.emit("selection-captured", text);
