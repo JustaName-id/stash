@@ -1,7 +1,13 @@
 mod double_shift;
 
 use double_shift::DoubleTapDetector;
+use std::sync::atomic::{AtomicBool, Ordering};
 use tauri::{AppHandle, Emitter, Manager};
+
+/// Ground truth for Input Monitoring: set the moment the key-state polling
+/// actually observes a pressed key. IOHIDCheckAccess can report stale
+/// denials after a grant; seeing keys proves the permission works.
+static KEYS_SEEN: AtomicBool = AtomicBool::new(false);
 use tauri_plugin_clipboard_manager::ClipboardExt;
 
 /// Synthesize ⌘C into the frontmost app (macOS only).
@@ -85,7 +91,8 @@ fn permission_status() -> PermissionStatus {
     {
         PermissionStatus {
             accessibility: macos_accessibility_client::accessibility::application_is_trusted(),
-            input_monitoring: unsafe { IOHIDCheckAccess(1) } == 0,
+            input_monitoring: unsafe { IOHIDCheckAccess(1) } == 0
+                || KEYS_SEEN.load(Ordering::Relaxed),
         }
     }
     #[cfg(not(target_os = "macos"))]
@@ -230,6 +237,9 @@ fn spawn_double_shift_listener(app: AppHandle) {
         let mut prev: Vec<Keycode> = Vec::new();
         loop {
             let keys = device.get_keys();
+            if !keys.is_empty() {
+                KEYS_SEEN.store(true, Ordering::Relaxed);
+            }
             let now_ms = start.elapsed().as_millis() as u64;
             for key in &keys {
                 if !prev.contains(key) {
