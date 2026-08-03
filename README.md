@@ -71,6 +71,12 @@ pnpm install
 pnpm tauri build
 ```
 
+> Tip: builds are adhoc-signed by default, and macOS invalidates permission
+> grants on every adhoc rebuild. Create a local code-signing cert (e.g.
+> "Stash Dev" via Keychain Access) and build with
+> `APPLE_SIGNING_IDENTITY="Stash Dev" pnpm tauri build` so Accessibility and
+> Input Monitoring grants survive rebuilds.
+
 Then move `src-tauri/target/release/bundle/macos/Stash.app` to
 `/Applications` (a `.dmg` is also produced under `bundle/dmg/`).
 
