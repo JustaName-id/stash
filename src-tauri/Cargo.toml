@@ -1,6 +1,6 @@
 [package]
 name = "stash"
-version = "0.2.0"
+version = "0.2.1"
 description = "Quick-capture panel for prompts, links, and ideas"
 authors = ["Stash contributors"]
 edition = "2021"
