@@ -315,6 +315,21 @@ describe("stash store", () => {
     expect(store.getState().collapsed).toEqual([]);
   });
 
+  it("selectAll and ranges skip items hidden by collapsed sections", () => {
+    const store = createStashStore();
+    store.getState().add("loose");
+    store.getState().add("# S");
+    store.getState().add("hidden");
+    const section = store.getState().items[1];
+    store.getState().toggleCollapsed(section.id);
+    store.getState().selectAll();
+    const texts = store
+      .getState()
+      .items.filter((i) => store.getState().selected.includes(i.id))
+      .map((i) => i.text);
+    expect(texts).toEqual(["loose"]);
+  });
+
   it("survives a JSON round-trip", () => {
     const store = createStashStore();
     store.getState().add("https://tanstack.com/query");

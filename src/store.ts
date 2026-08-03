@@ -173,7 +173,13 @@ export function createStashStore() {
     // or ⌘ click) and the target, sections excluded.
     selectRange: (toId) =>
       set((s) => {
-        const vis = visibleItems(s.items, s.activeSection, s.showDone, s.searchQuery)
+        const vis = visibleItems(
+          s.items,
+          s.activeSection,
+          s.showDone,
+          s.searchQuery,
+          s.collapsed,
+        )
           .filter((i) => i.kind !== "section")
           .map((i) => i.id);
         const b = vis.indexOf(toId);
@@ -186,7 +192,7 @@ export function createStashStore() {
     // ⌘A: everything currently visible, sections excluded (AC-13).
     selectAll: () =>
       set((s) => ({
-        selected: visibleItems(s.items, s.activeSection, s.showDone, s.searchQuery)
+        selected: visibleItems(s.items, s.activeSection, s.showDone, s.searchQuery, s.collapsed)
           .filter((i) => i.kind !== "section")
           .map((i) => i.id),
       })),
