@@ -39,7 +39,7 @@ export function MenuButton({
 }
 
 export function ContextMenu({ menu, onClose, onRequestEdit }: ContextMenuProps) {
-  // Select only stable references — a selector that returns a fresh array
+  // Select only stable references - a selector that returns a fresh array
   // (e.g. items.filter(...)) makes Zustand v5 re-render in an infinite loop
   // and crashes the whole UI.
   const items = useStashStore((s) => s.items);

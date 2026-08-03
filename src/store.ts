@@ -54,7 +54,7 @@ export function createStashStore() {
     searchQuery: "",
     anchorId: null,
     collapsed: [],
-    // Collapsing changes the view, so the selection clears (AC-13 rule).
+    // Collapsing changes the view, so the selection clears.
     toggleCollapsed: (id) =>
       set((s) => ({
         collapsed: s.collapsed.includes(id)
@@ -71,7 +71,7 @@ export function createStashStore() {
         if (sectionName) {
           // `# Name` creates a section and makes it the capture target. It
           // goes to the end of the list so existing loose items stay above
-          // the first header (i.e. in no section) — membership is positional.
+          // the first header (i.e. in no section) - membership is positional.
           const section: Item = {
             id: crypto.randomUUID(),
             text: sectionName.trim(),
@@ -88,7 +88,7 @@ export function createStashStore() {
           done: false,
           createdAt: Date.now(),
         };
-        // Captures land right below the active section's header (AC-16),
+        // Captures land right below the active section's header,
         // or at the top of the list when no section is active.
         if (s.activeSection) {
           const at = s.items.findIndex((i) => i.id === s.activeSection);
@@ -150,10 +150,10 @@ export function createStashStore() {
         collapsed: s.collapsed.filter((c) => c !== id),
       })),
     // View changes clear the selection so hidden items are never silently
-    // copied by ⌘C (AC-13).
+    // copied by ⌘C.
     setShowDone: (show) => set({ showDone: show, selected: [], anchorId: null }),
     // Merge below in-memory items: anything captured before hydration finishes
-    // is newer than the persisted list and must survive (AC-E4).
+    // is newer than the persisted list and must survive.
     hydrate: (persisted) =>
       set((s) =>
         s.hydrated ? s : { items: [...s.items, ...persisted], hydrated: true },
@@ -189,7 +189,7 @@ export function createStashStore() {
         const [lo, hi] = a < b ? [a, b] : [b, a];
         return { selected: vis.slice(lo, hi + 1) };
       }),
-    // ⌘A: everything currently visible, sections excluded (AC-13).
+    // ⌘A: everything currently visible, sections excluded.
     selectAll: () =>
       set((s) => ({
         selected: visibleItems(s.items, s.activeSection, s.showDone, s.searchQuery, s.collapsed)
@@ -197,7 +197,7 @@ export function createStashStore() {
           .map((i) => i.id),
       })),
     clearSelection: () => set({ selected: [], anchorId: null }),
-    // Plain click: this item becomes the whole selection (AC-5 v1.4).
+    // Plain click: this item becomes the whole selection.
     selectOnly: (id) =>
       set((s) => {
         const item = s.items.find((i) => i.id === id);
@@ -219,7 +219,7 @@ export function createStashStore() {
         };
       }),
     // Merge selected items into one note (newline-joined, list order),
-    // kept at the first selected item's position (AC-22).
+    // kept at the first selected item's position.
     mergeSelected: () =>
       set((s) => {
         const sel = new Set(s.selected);
@@ -238,7 +238,7 @@ export function createStashStore() {
         };
       }),
     // Move items below a section header (or to the top for null), keeping
-    // their relative order (AC-23).
+    // their relative order.
     moveToSection: (ids, sectionId) =>
       set((s) => {
         const moving = new Set(ids);
@@ -275,7 +275,7 @@ export function createStashStore() {
         selected: [],
       })),
     // dropIndex is the drop target's index in the pre-removal list; the
-    // dragged row takes the target's position (AC-14), so dragging downward
+    // dragged row takes the target's position, so dragging downward
     // needs a -1 adjustment after the row is removed.
     moveItem: (id, dropIndex) =>
       set((s) => {
@@ -298,7 +298,7 @@ export function createStashStore() {
             : at + 1 < sections.length
               ? sections[at + 1].id
               : null;
-        // Switching views clears the selection (AC-13); the newly active
+        // Switching views clears the selection; the newly active
         // section expands.
         return {
           activeSection: next,
@@ -308,7 +308,7 @@ export function createStashStore() {
         };
       }),
     // Clicking a section header activates it; clicking the active one
-    // returns to All (AC-16). View change clears the selection.
+    // returns to All. View change clears the selection.
     // Activating a section also expands it.
     setActiveSection: (id) =>
       set((s) => ({
@@ -317,7 +317,7 @@ export function createStashStore() {
         anchorId: null,
         collapsed: id ? s.collapsed.filter((c) => c !== id) : s.collapsed,
       })),
-    // Delete/Backspace with a selection active (AC-13).
+    // Delete/Backspace with a selection active.
     removeSelected: () =>
       set((s) => {
         const doomed = new Set(s.selected);

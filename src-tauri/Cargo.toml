@@ -2,7 +2,7 @@
 name = "stash"
 version = "0.2.0"
 description = "Quick-capture panel for prompts, links, and ideas"
-authors = ["Mariano Aguero"]
+authors = ["Stash contributors"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

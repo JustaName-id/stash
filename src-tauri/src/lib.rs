@@ -41,7 +41,7 @@ fn capture_frontmost_selection(app: &AppHandle) -> Option<String> {
     #[cfg(target_os = "macos")]
     {
         let clipboard = app.clipboard();
-        // Ok(text) — restorable. Err — non-text content (image, files):
+        // Ok(text) - restorable. Err - non-text content (image, files):
         // never overwrite it with a text write.
         let before = clipboard.read_text().ok();
         synthesize_cmd_c();
@@ -208,12 +208,12 @@ fn toggle_panel(app: &AppHandle) {
     };
     let visible = window.is_visible().unwrap_or(false);
     let focused = window.is_focused().unwrap_or(false);
-    // Focus-aware toggle (AC-1): a visible-but-unfocused panel gets focused,
-    // not hidden — hiding is only for the panel the user is actively in.
+    // Focus-aware toggle: a visible-but-unfocused panel gets focused,
+    // not hidden - hiding is only for the panel the user is actively in.
     if visible && focused {
         let _ = window.hide();
     } else {
-        // Grab the frontmost app's selection before we steal focus — the
+        // Grab the frontmost app's selection before we steal focus - the
         // panel isn't focused here, so ⌘C lands in the app the user is in,
         // whether the panel was hidden or visible-on-top.
         let selection = capture_frontmost_selection(app);
@@ -262,7 +262,7 @@ pub fn run() {
         .plugin(tauri_plugin_clipboard_manager::init())
         .setup(|app| {
             // Register in System Settings' Input Monitoring list and prompt
-            // on first launch — the key-state polling is silent without it.
+            // on first launch - the key-state polling is silent without it.
             #[cfg(target_os = "macos")]
             unsafe {
                 IOHIDRequestAccess(1);
@@ -287,8 +287,8 @@ pub fn run() {
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|app_handle, event| {
-            // Dock-icon click re-shows the panel — the recovery path that
-            // works even before Accessibility permission is granted (AC-9).
+            // Dock-icon click re-shows the panel - the recovery path that
+            // works even before Accessibility permission is granted.
             if let tauri::RunEvent::Reopen { .. } = event {
                 show_panel(app_handle);
             }

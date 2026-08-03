@@ -12,7 +12,7 @@
 ![Local First](https://img.shields.io/badge/local--first-zero%20network-success)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)
 
-![Stash — quick-capture panel](docs/screenshot.png)
+![Stash - quick-capture panel](docs/screenshot.png)
 
 ## Why
 
@@ -29,21 +29,21 @@ off as you go.
 
 ## Features
 
-- **⇧⇧ global capture** — double-tap Shift from any app to toggle the panel.
+- **⇧⇧ global capture** - double-tap Shift from any app to toggle the panel.
   The capture input is focused and ready to type. If you had text selected
   in the app you came from, it's captured automatically (your clipboard is
   left untouched).
-- **Checklist workflow** — check items off as you use them; hide the done
+- **Checklist workflow** - check items off as you use them; hide the done
   ones when you're finished.
-- **One-click copy** — click any item to copy it to the clipboard.
-- **Multi-select** — ⌘-click several items, then ⌘C copies them as one text.
+- **One-click copy** - click any item to copy it to the clipboard.
+- **Multi-select** - ⌘-click several items, then ⌘C copies them as one text.
   ⌫ deletes the selection.
-- **Sections** — type `# Name` to create a section; everything you capture
+- **Sections** - type `# Name` to create a section; everything you capture
   lands there until you switch. Cycle with ⌘K or click a section header.
-- **Link detection** — URLs are recognized and styled automatically.
-- **Drag to sort** — reorder items and sections by dragging.
-- **Pin control** — 📌 toggles always-on-top.
-- **100% local and private** — no account, no sync, no telemetry, zero
+- **Link detection** - URLs are recognized and styled automatically.
+- **Drag to sort** - reorder items and sections by dragging.
+- **Pin control** - 📌 toggles always-on-top.
+- **100% local and private** - no account, no sync, no telemetry, zero
   network requests. Your notes live in one JSON file on your Mac.
 
 ## Install
@@ -85,7 +85,7 @@ Then move `src-tauri/target/release/bundle/macos/Stash.app` to
 > System Settings → Privacy & Security. The app prompts for both on first
 > launch and shows a banner while anything is missing; the shortcut activates
 > a few seconds after granting. If you rebuild the app, remove and re-add the
-> entries — macOS ties them to the binary's signature. Heads-up: JetBrains
+> entries - macOS ties them to the binary's signature. Heads-up: JetBrains
 > IDEs bind ⇧⇧ themselves (Search Everywhere), so both will fire there.
 
 ## Keyboard reference
@@ -101,12 +101,12 @@ Then move `src-tauri/target/release/bundle/macos/Stash.app` to
 | ⌫ / Delete | Delete the selected items |
 | Esc | Clear the selection, or hide the panel |
 
-Closing the window only hides it — the app keeps running for ⇧⇧. Click the
+Closing the window only hides it - the app keeps running for ⇧⇧. Click the
 Dock icon to bring the panel back at any time; quit with ⌘Q.
 
 ## Privacy & data
 
-Stash makes **zero network requests** — enforced by a restrictive CSP and
+Stash makes **zero network requests** - enforced by a restrictive CSP and
 verifiable in the source (no HTTP client anywhere). The global key listener
 only distinguishes Shift from not-Shift; keystroke contents are never read,
 stored, or logged.
@@ -116,35 +116,27 @@ Your items live in a single JSON file:
 ever corrupt it's renamed to a timestamped `.bak`, never overwritten.
 
 > **Note:** items are stored as plain text (no at-rest encryption). If you
-> paste secrets, anything that can read your user files can read them — keep
+> paste secrets, anything that can read your user files can read them - keep
 > FileVault enabled.
 
 ## How it flows
 
 ```mermaid
 flowchart LR
-    APP["Any app<br/>ChatGPT · Cursor · browser · IDE"]
-    YOU(["You"])
-    STASH[("Stash<br/><i>local stash.json</i>")]
-    AI["AI tools via MCP<br/>Claude Code · Claude Desktop · Cursor"]
-    CLIP["Clipboard"]
-
-    APP -- "select text + ⇧⇧" --> STASH
-    YOU -- "type / paste · # sections" --> STASH
-    AI -- "add_item → section or Inbox" --> STASH
-    STASH -- "list_items · search_items" --> AI
-    STASH -- "click-copy · ⌘C · Copy as List" --> CLIP
-    CLIP -- "paste anywhere" --> APP
+    APP["Any app"] -- "⇧⇧ captures" --> STASH[("Stash")]
+    STASH -- "copy, paste back" --> APP
+    AI["Your AI (MCP)"] -- "adds items" --> STASH
+    STASH -- "reads items" --> AI
 ```
 
 Capture from anywhere with a double-Shift, let your AI read and add items
-through MCP, send things back through the clipboard — everything stays in one
+through MCP, send things back through the clipboard - everything stays in one
 local file on your Mac.
 
 ## AI access (MCP)
 
 Stash ships a local [MCP](https://modelcontextprotocol.io) server so your AI
-tools can read your stash and capture into it — still 100% local (stdio, no
+tools can read your stash and capture into it - still 100% local (stdio, no
 ports, no network). Tools: `list_items`, `search_items`, `add_item`. Writes
 land in a sidecar inbox that the running app merges within seconds; the
 server never touches `stash.json` directly.
@@ -155,7 +147,7 @@ Build it once:
 cd mcp && pnpm install && pnpm build
 ```
 
-Then register it in your client (restart the client afterwards — MCP
+Then register it in your client (restart the client afterwards - MCP
 servers load at startup):
 
 **Claude Code**
@@ -164,7 +156,7 @@ servers load at startup):
 claude mcp add stash -- node /path/to/stash/mcp/dist/index.js
 ```
 
-**Claude Desktop** — add to
+**Claude Desktop** - add to
 `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 ```json
@@ -178,7 +170,7 @@ claude mcp add stash -- node /path/to/stash/mcp/dist/index.js
 }
 ```
 
-**Cursor** — Settings → MCP → *Add new global MCP server*, same
+**Cursor** - Settings → MCP → *Add new global MCP server*, same
 `command`/`args` shape as above.
 
 Then ask your AI things like *"what's pending in my Stash?"*, *"save this

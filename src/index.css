@@ -2,7 +2,7 @@
 
 html,
 body {
-  /* Paint dark before React mounts — never a white flash (AC-9). */
+  /* Paint dark before React mounts - never a white flash. */
   background-color: #171717;
   overflow: hidden;
   user-select: none;

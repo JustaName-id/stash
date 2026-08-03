@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 const INLINE_RE = /(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g;
 
 /** Minimal safe inline markdown: **bold**, *italic*, `code`. Rendered as
- * React elements — never HTML — so item text cannot inject markup. */
+ * React elements - never HTML - so item text cannot inject markup. */
 export function renderInline(text: string): ReactNode[] {
   return text.split(INLINE_RE).map((part, i) => {
     if (part.startsWith("**") && part.endsWith("**") && part.length > 4)

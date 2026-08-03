@@ -3,7 +3,7 @@
  * Stash MCP server (stdio, local-only).
  *
  * Reads the Stash data file directly (read-only) and writes new captures to
- * a sidecar inbox file — never to stash.json, which the running app owns.
+ * a sidecar inbox file - never to stash.json, which the running app owns.
  * The app merges and deletes the sidecar on its own schedule.
  */
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";

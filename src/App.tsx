@@ -84,7 +84,7 @@ export default function App() {
           st.selectAll();
         }
       } else if (e.key === " " && st.selected.length > 0 && !isEditingText()) {
-        // Space toggles done on the selection (AC-5 v1.4).
+        // Space toggles done on the selection.
         e.preventDefault();
         st.toggleDoneSelected();
       } else if (
@@ -98,7 +98,7 @@ export default function App() {
         e.preventDefault();
         st.cycleActiveSection();
       } else if (e.metaKey && key === "c" && st.selected.length > 0) {
-        // Text selected inside an input wins over the bulk copy (AC-13).
+        // Text selected inside an input wins over the bulk copy.
         const el = document.activeElement;
         if (
           (el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement) &&
@@ -234,7 +234,7 @@ export default function App() {
           ref={searchRef}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="⌕  Search (filters only — capture below)"
+          placeholder="⌕  Search (filters only - capture below)"
           aria-label="Search items"
           className="min-w-0 flex-1 rounded-md border border-neutral-800 bg-neutral-800/50 px-2 py-1 text-xs text-neutral-200 placeholder:text-neutral-600 focus:border-amber-600/50 focus:outline-none"
         />
@@ -300,7 +300,7 @@ export default function App() {
       <PermissionBanner />
       {persistFailed && (
         <div className="mx-3 mb-2 rounded-lg border border-red-800/60 bg-red-950/40 px-3 py-2 text-xs text-red-200">
-          Saving is unavailable — items from this session are not being
+          Saving is unavailable - items from this session are not being
           persisted. Check that the app data folder is writable, then restart
           Stash.
         </div>
@@ -339,13 +339,13 @@ export default function App() {
               }}
               className="rounded-xl border border-dashed border-neutral-800 px-3 py-2 text-center text-[11px] text-neutral-600"
             >
-              No items — drop here
+              No items - drop here
             </li>
           )}
         {visible.length === 0 &&
           (items.length === 0 ? (
             <li className="px-2 pt-6 text-center text-xs leading-relaxed text-neutral-600">
-              Nothing captured yet. Type above and press Enter — use "# Name"
+              Nothing captured yet. Type above and press Enter - use "# Name"
               for a section. Click an item to select it, ⌘C to copy,
               double-click to edit, drag to reorder.
             </li>
@@ -353,7 +353,7 @@ export default function App() {
             <li className="px-2 pt-6 text-center text-xs text-neutral-600">
               {searchQuery
                 ? "No items match your search."
-                : 'All items here are hidden by the current filter — toggle "Show done" or press ⌘K.'}
+                : 'All items here are hidden by the current filter - toggle "Show done" or press ⌘K.'}
             </li>
           ))}
         {visible.flatMap((item, idx) => {
@@ -391,7 +391,7 @@ export default function App() {
                 }}
                 className="rounded-xl border border-dashed border-neutral-800 px-3 py-2 text-center text-[11px] text-neutral-600"
               >
-                No items — drop here
+                No items - drop here
               </li>,
             );
           }
@@ -412,7 +412,6 @@ export default function App() {
             <p className="mt-1 text-neutral-400">
               Version {version || "…"} · MIT
             </p>
-            <p className="mt-2 text-neutral-300">by Mariano Aguero</p>
             <p className="mt-2 text-neutral-500">
               Report issues (click to copy):
             </p>

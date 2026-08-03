@@ -32,7 +32,7 @@ export async function initPersistence(): Promise<void> {
     s = await getStore();
   } catch (err) {
     // Even the post-backup retry failed (e.g. read-only data dir). Degrade
-    // to in-memory for the session and warn the user visibly (AC-E6).
+    // to in-memory for the session and warn the user visibly.
     console.error("persistence unavailable, running in-memory", err);
     useStashStore.getState().setPersistFailed(true);
     useStashStore.getState().hydrate([]);

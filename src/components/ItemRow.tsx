@@ -51,7 +51,7 @@ export function ItemRow({
     onContextMenu,
     draggable: !editing,
     onDragStart: (e: DragEvent) => {
-      // ⌘/⇧-click mean selection gestures, never "start a drag" (AC-14).
+      // ⌘/⇧-click mean selection gestures, never "start a drag".
       if (e.metaKey || e.shiftKey) {
         e.preventDefault();
         return;
@@ -170,7 +170,7 @@ export function ItemRow({
             return;
           }
           // Plain (and ⌘) click is a pure toggle: it only ever changes THIS
-          // item's membership — the rest of the selection never collapses.
+          // item's membership - the rest of the selection never collapses.
           st.toggleSelected(item.id);
           if (!selected) {
             // It just became selected: copy it.

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createStashStore } from "./store";
 import { joinSelection, visibleItems } from "./lib/visible";
 
-/** Integration flow: a full user journey through the store layer —
+/** Integration flow: a full user journey through the store layer -
  * the closest to E2E the stack allows on macOS (tauri-driver is
  * Linux/Windows only). UI bindings are thin wrappers over these actions. */
 describe("full user journey", () => {

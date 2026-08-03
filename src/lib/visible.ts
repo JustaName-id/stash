@@ -19,7 +19,7 @@ export function visibleItems(
         (i.kind === "section" || showDone || !i.done),
     );
   }
-  // The active section only routes captures — it never filters the view.
+  // The active section only routes captures - it never filters the view.
   void activeSection;
   const hiddenSections = new Set(collapsed);
   const out: Item[] = [];
@@ -37,7 +37,7 @@ export function visibleItems(
   return out;
 }
 
-/** Bulk-copy text: selected items joined by newlines in list order (AC-13). */
+/** Bulk-copy text: selected items joined by newlines in list order. */
 export function joinSelection(items: Item[], selectedIds: string[]): string {
   const selected = new Set(selectedIds);
   return items
