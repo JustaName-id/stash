@@ -119,6 +119,28 @@ ever corrupt it's renamed to a timestamped `.bak`, never overwritten.
 > paste secrets, anything that can read your user files can read them — keep
 > FileVault enabled.
 
+## How it flows
+
+```mermaid
+flowchart LR
+    APP["Any app<br/>ChatGPT · Cursor · browser · IDE"]
+    YOU(["You"])
+    STASH[("Stash<br/><i>local stash.json</i>")]
+    AI["AI tools via MCP<br/>Claude Code · Claude Desktop · Cursor"]
+    CLIP["Clipboard"]
+
+    APP -- "select text + ⇧⇧" --> STASH
+    YOU -- "type / paste · # sections" --> STASH
+    AI -- "add_item → section or Inbox" --> STASH
+    STASH -- "list_items · search_items" --> AI
+    STASH -- "click-copy · ⌘C · Copy as List" --> CLIP
+    CLIP -- "paste anywhere" --> APP
+```
+
+Capture from anywhere with a double-Shift, let your AI read and add items
+through MCP, send things back through the clipboard — everything stays in one
+local file on your Mac.
+
 ## AI access (MCP)
 
 Stash ships a local [MCP](https://modelcontextprotocol.io) server so your AI
