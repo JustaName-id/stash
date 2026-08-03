@@ -51,7 +51,7 @@ off as you go.
 ### Download
 
 Grab the latest `.dmg` from
-[Releases](https://github.com/mariano-aguero/stash/releases), open it, and
+[Releases](https://github.com/JustaName-id/stash/releases), open it, and
 drag **Stash** to Applications. The app is not notarized (it's a local-first
 hobby project), so on first launch either right-click → Open, or clear the
 quarantine flag:
@@ -65,7 +65,7 @@ xattr -cr /Applications/Stash.app
 Requires [Rust](https://rustup.rs), Node.js 20+, and [pnpm](https://pnpm.io):
 
 ```sh
-git clone git@github.com:mariano-aguero/stash.git
+git clone git@github.com:JustaName-id/stash.git
 cd stash
 pnpm install
 pnpm tauri build

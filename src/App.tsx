@@ -417,14 +417,14 @@ export default function App() {
             </p>
             <button
               onClick={() =>
-                writeText("https://github.com/mariano-aguero/stash/issues").then(
+                writeText("https://github.com/JustaName-id/stash/issues").then(
                   flashCopied,
                   (err) => console.error("clipboard failed", err),
                 )
               }
               className="mt-0.5 cursor-pointer text-sky-400 underline decoration-sky-400/40 hover:text-sky-300"
             >
-              github.com/mariano-aguero/stash/issues
+              github.com/JustaName-id/stash/issues
             </button>
             <p className="mt-3">
               <button
