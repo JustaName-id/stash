@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+html,
+body {
+  /* Paint dark before React mounts — never a white flash (AC-9). */
+  background-color: #171717;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+/* The global user-select: none must not block editing in form fields. */
+textarea,
+input {
+  user-select: text;
+  -webkit-user-select: text;
+}
