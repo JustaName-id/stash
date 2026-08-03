@@ -70,20 +70,34 @@ extern "C" {
     fn IOHIDRequestAccess(request: u32) -> bool;
 }
 
+#[derive(serde::Serialize)]
+struct PermissionStatus {
+    accessibility: bool,
+    input_monitoring: bool,
+}
+
 /// The key-state polling needs Input Monitoring; posting the synthetic ⌘C
-/// needs Accessibility. The banner reports both as one "trusted" state.
+/// needs Accessibility. Reported separately so the banner can say which
+/// one is missing.
 #[tauri::command]
-fn is_accessibility_trusted() -> bool {
+fn permission_status() -> PermissionStatus {
     #[cfg(target_os = "macos")]
     {
-        let ax = macos_accessibility_client::accessibility::application_is_trusted();
-        let input = unsafe { IOHIDCheckAccess(1) } == 0;
-        ax && input
+        PermissionStatus {
+            accessibility: macos_accessibility_client::accessibility::application_is_trusted(),
+            input_monitoring: unsafe { IOHIDCheckAccess(1) } == 0,
+        }
     }
     #[cfg(not(target_os = "macos"))]
     {
-        true
+        PermissionStatus { accessibility: true, input_monitoring: true }
     }
+}
+
+/// Input Monitoring grants usually apply only after a relaunch.
+#[tauri::command]
+fn restart_app(app: AppHandle) {
+    app.restart();
 }
 
 #[tauri::command]
@@ -252,10 +266,11 @@ pub fn run() {
             }
         })
         .invoke_handler(tauri::generate_handler![
-            is_accessibility_trusted,
+            permission_status,
             prompt_accessibility,
             backup_corrupt_store,
-            drain_mcp_inbox
+            drain_mcp_inbox,
+            restart_app
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
