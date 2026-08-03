@@ -74,12 +74,13 @@ pnpm tauri build
 Then move `src-tauri/target/release/bundle/macos/Stash.app` to
 `/Applications` (a `.dmg` is also produced under `bundle/dmg/`).
 
-> **Accessibility permission:** the double-Shift shortcut needs macOS
-> Accessibility access (System Settings → Privacy & Security →
-> Accessibility). The app shows a banner that takes you to the right pane;
-> the shortcut activates a few seconds after granting. If you rebuild the
-> app, remove and re-add the permission entry — macOS ties it to the binary's
-> signature.
+> **Permissions:** the double-Shift shortcut needs **Input Monitoring** (to
+> see the Shift presses) and **Accessibility** (for selection capture) under
+> System Settings → Privacy & Security. The app prompts for both on first
+> launch and shows a banner while anything is missing; the shortcut activates
+> a few seconds after granting. If you rebuild the app, remove and re-add the
+> entries — macOS ties them to the binary's signature. Heads-up: JetBrains
+> IDEs bind ⇧⇧ themselves (Search Everywhere), so both will fire there.
 
 ## Keyboard reference
 
@@ -120,14 +121,41 @@ ports, no network). Tools: `list_items`, `search_items`, `add_item`. Writes
 land in a sidecar inbox that the running app merges within seconds; the
 server never touches `stash.json` directly.
 
+Build it once:
+
 ```sh
 cd mcp && pnpm install && pnpm build
-# Claude Code:
-claude mcp add stash -- node "$(pwd)/dist/index.js"
 ```
 
-Then ask Claude things like *"what's pending in my Stash?"* or *"save this
-prompt to my Prompts section"*.
+Then register it in your client (restart the client afterwards — MCP
+servers load at startup):
+
+**Claude Code**
+
+```sh
+claude mcp add stash -- node /path/to/stash/mcp/dist/index.js
+```
+
+**Claude Desktop** — add to
+`~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "stash": {
+      "command": "node",
+      "args": ["/path/to/stash/mcp/dist/index.js"]
+    }
+  }
+}
+```
+
+**Cursor** — Settings → MCP → *Add new global MCP server*, same
+`command`/`args` shape as above.
+
+Then ask your AI things like *"what's pending in my Stash?"*, *"save this
+prompt to my Prompts section"*, or *"add the three follow-ups we discussed
+to my stash"*.
 
 ## Development
 

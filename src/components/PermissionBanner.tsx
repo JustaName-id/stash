@@ -20,7 +20,8 @@ export function PermissionBanner() {
   return (
     <div className="mx-3 mb-2 rounded-lg border border-amber-700/50 bg-amber-950/40 px-3 py-2 text-xs text-amber-200">
       <p className="mb-1.5">
-        Stash needs Accessibility permission for the double-Shift shortcut.
+        Stash needs Accessibility and Input Monitoring permissions for the
+        double-Shift shortcut. Enable both for Stash in Privacy & Security.
       </p>
       <button
         onClick={() => invoke("prompt_accessibility")}

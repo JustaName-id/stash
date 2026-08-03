@@ -62,11 +62,23 @@ fn capture_frontmost_selection(app: &AppHandle) -> Option<String> {
     }
 }
 
+#[cfg(target_os = "macos")]
+#[link(name = "IOKit", kind = "framework")]
+extern "C" {
+    // kIOHIDRequestTypeListenEvent = 1; IOHIDCheckAccess: 0 = granted.
+    fn IOHIDCheckAccess(request: u32) -> u32;
+    fn IOHIDRequestAccess(request: u32) -> bool;
+}
+
+/// The key-state polling needs Input Monitoring; posting the synthetic ⌘C
+/// needs Accessibility. The banner reports both as one "trusted" state.
 #[tauri::command]
 fn is_accessibility_trusted() -> bool {
     #[cfg(target_os = "macos")]
     {
-        macos_accessibility_client::accessibility::application_is_trusted()
+        let ax = macos_accessibility_client::accessibility::application_is_trusted();
+        let input = unsafe { IOHIDCheckAccess(1) } == 0;
+        ax && input
     }
     #[cfg(not(target_os = "macos"))]
     {
@@ -77,7 +89,10 @@ fn is_accessibility_trusted() -> bool {
 #[tauri::command]
 fn prompt_accessibility() {
     #[cfg(target_os = "macos")]
-    macos_accessibility_client::accessibility::application_is_trusted_with_prompt();
+    {
+        macos_accessibility_client::accessibility::application_is_trusted_with_prompt();
+        unsafe { IOHIDRequestAccess(1) };
+    }
 }
 
 /// Moves a corrupt data file aside so the app can start fresh without
@@ -220,6 +235,12 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_clipboard_manager::init())
         .setup(|app| {
+            // Register in System Settings' Input Monitoring list and prompt
+            // on first launch — the key-state polling is silent without it.
+            #[cfg(target_os = "macos")]
+            unsafe {
+                IOHIDRequestAccess(1);
+            }
             spawn_double_shift_listener(app.handle().clone());
             Ok(())
         })
