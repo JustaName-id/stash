@@ -46,8 +46,8 @@ export function PermissionBanner() {
         </button>
       </div>
       <p className="mt-1.5 text-amber-200/60">
-        Input Monitoring usually applies after a restart — grant both, then
-        hit Restart.
+        Note: macOS may quit Stash the moment you grant Input Monitoring —
+        that's normal; just reopen it. Otherwise grant both and hit Restart.
       </p>
     </div>
   );
